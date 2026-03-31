@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui';
 import type { Order } from '@/types';
 import { productsApi } from '@/services/products.api';
+import { categoriesApi } from '@/services/categories.api';
 import CategoryTabs from './CategoryTabs';
 import ProductGrid from './ProductGrid';
 import CartPanel from './CartPanel';
@@ -22,12 +23,12 @@ export default function PosPage() {
   // Fetch data
   const { data: categories = [], isLoading: isLoadingCats } = useQuery({
     queryKey: ['categories'],
-    queryFn: productsApi.getCategories,
+    queryFn: categoriesApi.getCategories,
   });
 
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products'],
-    queryFn: productsApi.getProducts,
+    queryFn: () => productsApi.getProducts(),
   });
 
   // Filter products by category and search query

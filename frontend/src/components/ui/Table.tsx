@@ -18,6 +18,7 @@ interface TableProps<T> {
   keyExtractor?: (row: T, index: number) => string | number;
   emptyMessage?: string;
   striped?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -28,6 +29,7 @@ export default function Table<T>({
   keyExtractor,
   emptyMessage = 'No data available',
   striped = true,
+  isLoading = false,
   className = '',
 }: TableProps<T>) {
   return (
@@ -35,12 +37,12 @@ export default function Table<T>({
       <table className="w-full text-sm">
         {/* ─── Header ─── */}
         <thead>
-          <tr className="border-b border-border bg-surface-overlay/50">
+          <tr className="border-b border-border bg-surface-overlay/50 text-text-muted">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={`
-                  px-4 py-3 text-left font-semibold text-text-muted uppercase tracking-wider text-xs
+                  px-4 py-3 text-left font-semibold uppercase tracking-wider text-xs
                   ${col.headerClassName || ''}
                 `}
                 style={col.width ? { width: col.width } : undefined}
@@ -53,7 +55,17 @@ export default function Table<T>({
 
         {/* ─── Body ─── */}
         <tbody>
-          {data.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <tr key={i} className="border-b border-border/50 last:border-b-0 animate-pulse">
+                {columns.map((col) => (
+                  <td key={col.key} className="px-4 py-4">
+                    <div className="h-4 bg-surface-hover rounded w-3/4"></div>
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}

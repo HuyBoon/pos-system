@@ -17,7 +17,7 @@ const tableSlice = createSlice({
     ) {
       const table = state.tables.find((t) => t.id === action.payload.tableId);
       if (table) {
-        table.status = 'occupied';
+        table.status = 'OCCUPIED';
         table.currentOrderId = action.payload.orderId;
       }
     },
@@ -26,7 +26,7 @@ const tableSlice = createSlice({
     freeTable(state, action: PayloadAction<number>) {
       const table = state.tables.find((t) => t.id === action.payload);
       if (table) {
-        table.status = 'available';
+        table.status = 'AVAILABLE';
         table.currentOrderId = null;
       }
     },
@@ -39,7 +39,7 @@ const tableSlice = createSlice({
       const table = state.tables.find((t) => t.id === action.payload.tableId);
       if (table) {
         table.status = action.payload.status;
-        if (action.payload.status === 'available') {
+        if (action.payload.status === 'AVAILABLE') {
           table.currentOrderId = null;
         }
       }

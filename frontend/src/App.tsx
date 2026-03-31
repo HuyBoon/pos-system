@@ -5,6 +5,9 @@ import AdminGuard from '@/features/auth/AdminGuard';
 import PosPage from '@/features/pos/PosPage';
 import OrdersPage from '@/features/orders/OrdersPage';
 import DashboardPage from '@/features/admin/DashboardPage';
+import CategoriesManagement from '@/features/admin/CategoriesManagement';
+import ProductsManagement from '@/features/admin/ProductsManagement';
+import TablesManagement from '@/features/admin/TablesManagement';
 
 export default function App() {
   return (
@@ -25,6 +28,30 @@ export default function App() {
             element={
               <AdminGuard>
                 <DashboardPage />
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <AdminGuard>
+                <CategoriesManagement />
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <AdminGuard>
+                <ProductsManagement />
+              </AdminGuard>
+            }
+          />
+          <Route
+            path="/admin/tables"
+            element={
+              <AdminGuard>
+                <TablesManagement />
               </AdminGuard>
             }
           />

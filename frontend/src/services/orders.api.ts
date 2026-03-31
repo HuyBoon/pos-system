@@ -4,6 +4,7 @@ import type { Order } from '@/types';
 export interface CreateOrderDto {
   staffId: number;
   tableId?: number | null;
+  customerName?: string;
   items: {
     productId: number;
     quantity: number;
@@ -12,8 +13,8 @@ export interface CreateOrderDto {
 
 export const ordersApi = {
   getOrders: async (): Promise<Order[]> => {
-    const { data } = await api.get('/orders');
-    return data;
+    const { data } = await api.get<{ orders: Order[]; meta: any }>('/orders');
+    return data.orders;
   },
   
   createOrder: async (order: CreateOrderDto): Promise<Order> => {

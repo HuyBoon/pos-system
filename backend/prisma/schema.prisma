@@ -42,15 +42,17 @@ model Product {
 
 // 4. Hóa đơn tổng
 model Order {
-  id          Int         @id @default(autoincrement())
-  totalAmount Float       // Tổng tiền cuối cùng khách phải trả
-  status      OrderStatus @default(COMPLETED)
-  tableId     Int?        // Lưu lại id bàn (Bàn 1, Bàn 2...)
-  staffId     Int
-  staff       User        @relation(fields: [staffId], references: [id])
-  items       OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id           Int         @id @default(autoincrement())
+  totalAmount  Float       // Tổng tiền cuối cùng khách phải trả
+  status       OrderStatus @default(COMPLETED)
+  customerName String?     // Tên khách hàng (mặc định Khách lẻ)
+  tableId      Int?        // Lưu lại id bàn
+  table        Table?      @relation(fields: [tableId], references: [id])
+  staffId      Int
+  staff        User        @relation(fields: [staffId], references: [id])
+  items        OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 // 5. Chi tiết từng món trong hóa đơn
@@ -61,7 +63,19 @@ model OrderItem {
   productId Int
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Float   // Giá chốt tại thời điểm bán (tránh lỗi lệch doanh thu khi đổi giá sản phẩm sau này)
+  price     Float   // Giá chốt tại thời điểm bán
+}
+
+// 6. Quản lý bàn
+model Table {
+  id             Int         @id @default(autoincrement())
+  name           String
+  seats          Int         @default(4)
+  status         TableStatus @default(AVAILABLE)
+  currentOrderId Int?        // Lưu ID đơn hàng đang phục vụ nếu có
+  orders         Order[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 enum Role {
@@ -73,4 +87,10 @@ enum OrderStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
 }

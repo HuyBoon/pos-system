@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, TableStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto.js';
@@ -17,6 +17,7 @@ export class OrdersService {
    * 1. Validates that all products exist and have sufficient stock
    * 2. Creates the Order + OrderItems
    * 3. Deducts stock for each product
+   * 4. Updates Table status to OCCUPIED if tableId is provided
    */
   async create(createOrderDto: CreateOrderDto) {
     return this.prisma.$transaction(async (tx) => {
@@ -69,6 +70,7 @@ export class OrdersService {
           totalAmount,
           staffId: createOrderDto.staffId,
           tableId: createOrderDto.tableId || null,
+          customerName: createOrderDto.customerName || 'Khách lẻ',
           status: createOrderDto.tableId ? OrderStatus.PENDING : OrderStatus.COMPLETED,
           items: {
             create: orderItemsData,
@@ -84,7 +86,18 @@ export class OrdersService {
         },
       });
 
-      // 4. Deduct stock for each item
+      // 4. Updates Table status to OCCUPIED if tableId is provided
+      if (createOrderDto.tableId) {
+        await tx.table.update({
+          where: { id: createOrderDto.tableId },
+          data: {
+            status: TableStatus.OCCUPIED,
+            currentOrderId: order.id,
+          },
+        });
+      }
+
+      // 5. Deduct stock for each item
       for (const item of createOrderDto.items) {
         await tx.product.update({
           where: { id: item.productId },
@@ -106,11 +119,11 @@ export class OrdersService {
         skip,
         take: limit,
         include: {
+          items: {
+            include: { product: true },
+          },
           staff: {
             select: { id: true, username: true },
-          },
-          _count: {
-            select: { items: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -157,9 +170,9 @@ export class OrdersService {
       throw new BadRequestException('Cannot update a cancelled order');
     }
 
-    // If cancelling, restore stock
-    if (updateOrderStatusDto.status === OrderStatus.CANCELLED) {
-      await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. If cancelling, restore stock
+      if (updateOrderStatusDto.status === OrderStatus.CANCELLED) {
         // Restore stock for all items
         for (const item of order.items) {
           await tx.product.update({
@@ -169,27 +182,36 @@ export class OrdersService {
             },
           });
         }
+      }
 
-        await tx.order.update({
-          where: { id },
-          data: { status: updateOrderStatusDto.status },
+      // 2. If completing or cancelling, free the associated table
+      if (
+        order.tableId &&
+        (updateOrderStatusDto.status === OrderStatus.COMPLETED ||
+          updateOrderStatusDto.status === OrderStatus.CANCELLED)
+      ) {
+        await tx.table.update({
+          where: { id: order.tableId },
+          data: {
+            status: TableStatus.AVAILABLE,
+            currentOrderId: null,
+          },
         });
+      }
+
+      // 3. Update the order status
+      return tx.order.update({
+        where: { id },
+        data: { status: updateOrderStatusDto.status as OrderStatus },
+        include: {
+          items: {
+            include: { product: true },
+          },
+          staff: {
+            select: { id: true, username: true, role: true },
+          },
+        },
       });
-
-      return this.findOne(id);
-    }
-
-    return this.prisma.order.update({
-      where: { id },
-      data: { status: updateOrderStatusDto.status },
-      include: {
-        items: {
-          include: { product: true },
-        },
-        staff: {
-          select: { id: true, username: true, role: true },
-        },
-      },
     });
   }
 }

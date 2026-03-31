@@ -1,7 +1,8 @@
-import { Users, ChevronRight } from 'lucide-react';
-import { useAppSelector } from '@/store/hooks';
+import { Users, ChevronRight, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import type { PosTable } from '@/types';
+import { tablesApi } from '@/services/tables.api';
 
 interface TableGridProps {
   selectedTableId: number | null;
@@ -9,13 +10,24 @@ interface TableGridProps {
 }
 
 const statusConfig: Record<PosTable['status'], { color: string; label: string }> = {
-  available: { color: 'border-success/40 bg-success/8 hover:border-success/60', label: 'Trống' },
-  occupied:  { color: 'border-danger/40 bg-danger/8', label: 'Có khách' },
-  reserved:  { color: 'border-warning/40 bg-warning/8', label: 'Đã đặt' },
+  AVAILABLE: { color: 'border-success/40 bg-success/8 hover:border-success/60', label: 'Trống' },
+  OCCUPIED:  { color: 'border-danger/40 bg-danger/8', label: 'Có khách' },
+  RESERVED:  { color: 'border-warning/40 bg-warning/8', label: 'Đã đặt' },
 };
 
 export default function TableGrid({ selectedTableId, onSelect }: TableGridProps) {
-  const { tables } = useAppSelector((state) => state.tables);
+  const { data: tables = [], isLoading } = useQuery({
+    queryKey: ['tables'],
+    queryFn: tablesApi.getTables,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="h-32 flex items-center justify-center bg-surface-overlay/30 rounded-2xl border border-border border-dashed">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -58,21 +70,20 @@ export default function TableGrid({ selectedTableId, onSelect }: TableGridProps)
 
         {tables.map((table) => {
           const config = statusConfig[table.status];
-          const isAvailable = table.status === 'available';
           const isSelected = selectedTableId === table.id;
 
           return (
             <button
               key={table.id}
-              onClick={() => isAvailable && onSelect(table.id)}
-              disabled={!isAvailable}
+              onClick={() => table.status === 'AVAILABLE' && onSelect(table.id)}
+              disabled={table.status !== 'AVAILABLE'}
               className={cn(
                 'relative flex flex-col items-center justify-center px-3 py-3 rounded-xl text-sm font-medium',
                 'border-2 transition-all duration-200',
                 isSelected
                   ? 'border-primary bg-primary/15 text-primary-light shadow-sm ring-1 ring-primary/20'
                   : config.color,
-                isAvailable
+                table.status === 'AVAILABLE'
                   ? 'cursor-pointer'
                   : 'cursor-not-allowed opacity-70'
               )}
@@ -80,9 +91,9 @@ export default function TableGrid({ selectedTableId, onSelect }: TableGridProps)
               {/* Status dot */}
               <span className={cn(
                 'absolute top-1.5 right-1.5 w-2 h-2 rounded-full',
-                table.status === 'available' && 'bg-success',
-                table.status === 'occupied' && 'bg-danger animate-pulse',
-                table.status === 'reserved' && 'bg-warning',
+                table.status === 'AVAILABLE' && 'bg-success',
+                table.status === 'OCCUPIED' && 'bg-danger animate-pulse',
+                table.status === 'RESERVED' && 'bg-warning',
               )} />
 
               <span className="text-lg mb-0.5">🪑</span>
@@ -92,7 +103,7 @@ export default function TableGrid({ selectedTableId, onSelect }: TableGridProps)
               </span>
 
               {/* Order indicator for occupied tables */}
-              {table.status === 'occupied' && table.currentOrderId && (
+              {table.status === 'OCCUPIED' && table.currentOrderId && (
                 <span className="text-[10px] text-danger font-medium mt-0.5 flex items-center gap-0.5">
                   #{table.currentOrderId} <ChevronRight size={10} />
                 </span>

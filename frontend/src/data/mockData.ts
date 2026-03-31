@@ -37,16 +37,16 @@ export const products: Product[] = [
 
 // ─── Initial Tables (10 tables) ───
 export const initialTables: PosTable[] = [
-  { id: 1,  name: 'Bàn 1',  seats: 2, status: 'available', currentOrderId: null },
-  { id: 2,  name: 'Bàn 2',  seats: 4, status: 'available', currentOrderId: null },
-  { id: 3,  name: 'Bàn 3',  seats: 4, status: 'available', currentOrderId: null },
-  { id: 4,  name: 'Bàn 4',  seats: 6, status: 'available', currentOrderId: null },
-  { id: 5,  name: 'Bàn 5',  seats: 2, status: 'available', currentOrderId: null },
-  { id: 6,  name: 'Bàn 6',  seats: 8, status: 'available', currentOrderId: null },
-  { id: 7,  name: 'Bàn 7',  seats: 4, status: 'reserved',  currentOrderId: null },
-  { id: 8,  name: 'Bàn 8',  seats: 2, status: 'available', currentOrderId: null },
-  { id: 9,  name: 'Bàn 9',  seats: 6, status: 'available', currentOrderId: null },
-  { id: 10, name: 'Bàn 10', seats: 4, status: 'available', currentOrderId: null },
+  { id: 1,  name: 'Bàn 1',  seats: 2, status: 'AVAILABLE', currentOrderId: null },
+  { id: 2,  name: 'Bàn 2',  seats: 4, status: 'AVAILABLE', currentOrderId: null },
+  { id: 3,  name: 'Bàn 3',  seats: 4, status: 'AVAILABLE', currentOrderId: null },
+  { id: 4,  name: 'Bàn 4',  seats: 6, status: 'AVAILABLE', currentOrderId: null },
+  { id: 5,  name: 'Bàn 5',  seats: 2, status: 'AVAILABLE', currentOrderId: null },
+  { id: 6,  name: 'Bàn 6',  seats: 8, status: 'AVAILABLE', currentOrderId: null },
+  { id: 7,  name: 'Bàn 7',  seats: 4, status: 'RESERVED',  currentOrderId: null },
+  { id: 8,  name: 'Bàn 8',  seats: 2, status: 'AVAILABLE', currentOrderId: null },
+  { id: 9,  name: 'Bàn 9',  seats: 6, status: 'AVAILABLE', currentOrderId: null },
+  { id: 10, name: 'Bàn 10', seats: 4, status: 'AVAILABLE', currentOrderId: null },
 ];
 
 // ─── Staff (mock credentials) ───

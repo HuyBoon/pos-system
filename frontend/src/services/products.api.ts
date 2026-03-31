@@ -1,14 +1,28 @@
 import { api } from '@/lib/api';
-import type { Product, Category } from '@/types';
+import type { Product } from '@/types';
 
 export const productsApi = {
-  getProducts: async (): Promise<Product[]> => {
-    const { data } = await api.get('/products');
+  getProducts: async (categoryId?: number): Promise<Product[]> => {
+    const { data } = await api.get('/products', { params: { categoryId } });
     return data;
   },
-  
-  getCategories: async (): Promise<Category[]> => {
-    const { data } = await api.get('/categories');
+
+  getProduct: async (id: number): Promise<Product> => {
+    const { data } = await api.get(`/products/${id}`);
     return data;
+  },
+
+  createProduct: async (product: Partial<Product>): Promise<Product> => {
+    const { data } = await api.post('/products', product);
+    return data;
+  },
+
+  updateProduct: async (id: number, product: Partial<Product>): Promise<Product> => {
+    const { data } = await api.patch(`/products/${id}`, product);
+    return data;
+  },
+
+  deleteProduct: async (id: number): Promise<void> => {
+    await api.delete(`/products/${id}`);
   },
 };

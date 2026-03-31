@@ -156,7 +156,7 @@ export default function DashboardPage() {
               >
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                   <span className="text-sm font-bold text-primary-light">
-                    {s.displayName.charAt(0)}
+                    {s.displayName?.charAt(0) || '?'}
                   </span>
                 </div>
                 <div>

@@ -4,6 +4,9 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  FolderTree,
+  Package,
+  Table as TableIcon,
 } from 'lucide-react';
 import { Badge } from '@/components/ui';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
@@ -17,7 +20,10 @@ const navItems = [
 ];
 
 const adminItems = [
-  { to: '/admin', label: 'Quản lý', icon: LayoutDashboard },
+  { to: '/admin', label: 'Tổng quan', icon: LayoutDashboard },
+  { to: '/admin/categories', label: 'Danh mục', icon: FolderTree },
+  { to: '/admin/products', label: 'Sản phẩm', icon: Package },
+  { to: '/admin/tables', label: 'Bàn', icon: TableIcon },
 ];
 
 export default function Sidebar() {
@@ -72,6 +78,7 @@ export default function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.to === '/admin'}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',

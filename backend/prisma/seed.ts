@@ -94,6 +94,28 @@ async function main() {
   }
 
   console.log('Created products');
+  
+  // 4. Create Tables
+  console.log('Seeding tables...');
+  const tablesCount = 12;
+  for (let i = 1; i <= tablesCount; i++) {
+    await prisma.table.upsert({
+      where: { id: i },
+      update: {
+        name: `Bàn ${i}`,
+        seats: i <= 4 ? 2 : (i <= 10 ? 4 : 8),
+        status: 'AVAILABLE',
+      },
+      create: {
+        id: i,
+        name: `Bàn ${i}`,
+        seats: i <= 4 ? 2 : (i <= 10 ? 4 : 8),
+        status: 'AVAILABLE',
+      },
+    });
+  }
+
+  console.log(`Created ${tablesCount} tables`);
   console.log('Database seeded successfully 🎉');
 }
 

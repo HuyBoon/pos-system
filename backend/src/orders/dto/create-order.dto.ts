@@ -6,6 +6,7 @@ import {
   ArrayMinSize,
   Min,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateOrderItemDto {
@@ -24,6 +25,10 @@ export class CreateOrderDto {
   @IsInt()
   @IsOptional()
   tableId?: number | null;
+
+  @IsString()
+  @IsOptional()
+  customerName?: string;
 
   @IsArray()
   @ArrayMinSize(1)

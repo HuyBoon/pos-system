@@ -53,7 +53,7 @@ export default function OrdersPage() {
       : orders.filter((o) => o.status === activeFilter);
 
   const pendingOrders = orders.filter((o) => o.status === 'PENDING');
-  const occupiedTables = tables.filter((t) => t.status === 'occupied');
+  const occupiedTables = tables.filter((t) => t.status === 'OCCUPIED');
 
   const handleCompleteOrder = (order: Order) => {
     updateStatusMutation.mutate({ id: order.id, status: 'COMPLETED' });
@@ -131,12 +131,12 @@ export default function OrdersPage() {
                         <div className="mt-1.5 space-y-0.5">
                           <p className="text-xs text-text-muted">
                             <span className="font-medium text-text">#{order.id}</span> •{' '}
-                            {order.customerName}
+                            {order.customerName || 'Khách lẻ'}
                           </p>
                           <p className="text-xs text-text-muted">
-                            {order.items.length} món •{' '}
+                            {order?.items?.length || 0} món •{' '}
                             <span className="font-semibold text-primary-light">
-                              {formatVND(order.totalAmount)}
+                              {formatVND(order?.totalAmount || 0)}
                             </span>
                           </p>
                           <div className="flex gap-1.5 mt-2">
@@ -209,8 +209,8 @@ export default function OrdersPage() {
                 <p className="text-2xl font-bold text-success mt-1">
                   {formatVND(
                     orders
-                      .filter((o) => o.status === 'COMPLETED')
-                      .reduce((sum, o) => sum + o.totalAmount, 0)
+                      .filter((o) => o?.status === 'COMPLETED')
+                      .reduce((sum, o) => sum + (o?.totalAmount || 0), 0)
                   )}
                 </p>
               </div>
@@ -283,13 +283,13 @@ export default function OrdersPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-text">
-                          {order.customerName}
+                          {order.customerName || 'Khách lẻ'}
                         </p>
                         {statusBadge(order.status)}
                       </div>
                       <p className="text-xs text-text-muted mt-0.5">
-                        {order.tableName} • {formatDateTime(order.createdAt)} •{' '}
-                        {order.staffName}
+                        {order.tableName || (order.tableId ? `Bàn ${order.tableId}` : 'Mang đi')} • {formatDateTime(order.createdAt)} •{' '}
+                        {order.staffName || (order as any).staff?.username || 'Nhân viên'}
                       </p>
                     </div>
                     <span className="text-sm font-bold text-primary-light">
@@ -306,13 +306,13 @@ export default function OrdersPage() {
                   {expandedOrderId === order.id && (
                     <div className="px-4 pb-3 pl-18 animate-fade-in">
                       <div className="bg-surface-overlay/50 rounded-xl p-3 space-y-1.5">
-                        {order.items.map((item) => (
+                        {order?.items?.map((item) => (
                           <div key={item.id} className="flex justify-between text-sm">
                             <span className="text-text-muted">
                               {item.productName} × {item.quantity}
                             </span>
                             <span className="text-text">
-                              {formatVND(item.price * item.quantity)}
+                              {formatVND((item.price || 0) * (item.quantity || 0))}
                             </span>
                           </div>
                         ))}

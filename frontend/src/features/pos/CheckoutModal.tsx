@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Input, Modal } from '@/components/ui';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearCart } from '@/store/slices/cartSlice';
-import { occupyTable } from '@/store/slices/tableSlice';
 import { formatVND } from '@/lib/utils';
 import type { Order } from '@/types';
 import { ordersApi } from '@/services/orders.api';
+import { tablesApi } from '@/services/tables.api';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -22,9 +22,15 @@ export default function CheckoutModal({
   preSelectedTableId,
 }: CheckoutModalProps) {
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { items, totalAmount } = useAppSelector((state) => state.cart);
   const { currentUser } = useAppSelector((state) => state.auth);
-  const { tables } = useAppSelector((state) => state.tables);
+
+  // Fetch tables from DB instead of Redux
+  const { data: tables = [] } = useQuery({
+    queryKey: ['tables'],
+    queryFn: tablesApi.getTables,
+  });
 
   const [customerName, setCustomerName] = useState('');
 
@@ -35,33 +41,19 @@ export default function CheckoutModal({
   const createOrderMutation = useMutation({
     mutationFn: ordersApi.createOrder,
     onSuccess: (newOrder) => {
-      const isDineIn = preSelectedTableId !== null;
-      if (isDineIn && preSelectedTableId) {
-        dispatch(
-          occupyTable({
-            tableId: preSelectedTableId,
-            orderId: newOrder.id,
-          })
-        );
-      }
+      // Invalidate tables to update status on the UI
+      queryClient.invalidateQueries({ queryKey: ['tables'] });
+      
       dispatch(clearCart());
       setCustomerName('');
       onClose();
       
-      // Simulate frontend order format for UI compatibility if needed
+      // Pass formatted order to parent for immediate display (receipt, etc)
       onOrderCreated({
         ...newOrder,
         staffName: currentUser?.displayName || 'Nhân viên',
         customerName: customerName || 'Khách lẻ',
         tableName: selectedTable?.name || 'Mang đi',
-        items: items.map((item, idx) => ({
-          id: idx + 1,
-          orderId: newOrder.id,
-          productId: item.product.id,
-          productName: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
       });
     },
     onError: (err: any) => {
@@ -75,6 +67,7 @@ export default function CheckoutModal({
     createOrderMutation.mutate({
       staffId: currentUser.id,
       tableId: preSelectedTableId,
+      customerName: customerName.trim() || undefined,
       items: items.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,

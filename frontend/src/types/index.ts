@@ -79,7 +79,7 @@ export interface AuthState {
   token: string | null;
 }
 
-export type TableStatus = 'available' | 'occupied' | 'reserved';
+export type TableStatus = 'AVAILABLE' | 'OCCUPIED' | 'RESERVED';
 
 export interface PosTable {
   id: number;

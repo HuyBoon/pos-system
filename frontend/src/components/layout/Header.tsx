@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store/hooks';
 export default function Header() {
   const { currentUser } = useAppSelector((state) => state.auth);
   const { tables } = useAppSelector((state) => state.tables);
-  const availableTables = tables.filter((t) => t.status === 'available').length;
+  const availableTables = tables.filter((t) => t.status === 'AVAILABLE').length;
 
   return (
     <header className="h-16 border-b border-border bg-surface-raised flex items-center justify-between px-6">
